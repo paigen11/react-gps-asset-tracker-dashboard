@@ -1,9 +1,98 @@
-import type { NextPage } from 'next'
-import Head from 'next/head'
-import Image from 'next/image'
-import styles from '../styles/Home.module.css'
+import { useEffect, useState } from "react";
+import Head from "next/head";
+import Image from "next/image";
+import dynamic from "next/dynamic";
+import { GetServerSideProps } from "next";
+import { useRouter } from "next/router";
+import { fetchNotecardData } from "../src/lib/notecardData";
+import useInterval from "../src/hooks/useInterval";
+import styles from "../styles/Home.module.css";
 
-const Home: NextPage = () => {
+export default function Home({
+  data,
+}: {
+  data: {
+    uid: string;
+    device_uid: string;
+    file: string;
+    captured: string;
+    received: string;
+    body: {
+      temperature: number;
+      voltage: number;
+    };
+    tower_location?: {
+      when: string;
+      latitude: number;
+      longitude: number;
+    };
+    gps_location: {
+      when: string;
+      latitude: number;
+      longitude: number;
+    };
+  }[];
+}) {
+  // needed to make the Leaflet map render correctly
+  const MapWithNoSSR = dynamic(() => import("../src/components/Map"), {
+    ssr: false,
+  });
+
+  const router = useRouter();
+
+  // h/t to Josh Comeau for this stroke of brilliance: https://www.joshwcomeau.com/nextjs/refreshing-server-side-props/
+  const refreshData = () => {
+    router.replace(router.asPath, router.asPath, { scroll: false });
+    setIsRefreshing(true);
+  };
+
+  const [lngLatCoords, setLngLatCoords] = useState<number[][]>([]);
+  const [lastPosition, setLastPosition] = useState<[number, number]>([
+    33.82854810044288, -84.32526648205214,
+  ]);
+  const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
+  // todo consider setting this to even longer intervals like 5 mins
+  const [delayTime, setDelayTime] = useState<number>(300000);
+
+  useInterval(() => {
+    refreshData();
+  }, delayTime);
+
+  useEffect(() => {
+    const lngLatArray: number[][] = [];
+    if (data && data.length > 0) {
+      data
+        .sort((a, b) => {
+          return Number(a.captured) - Number(b.captured);
+        })
+        .map((event) => {
+          let lngLatCoords: number[] = [];
+          if (event.gps_location) {
+            lngLatCoords = [
+              event.gps_location?.longitude,
+              event.gps_location?.latitude,
+            ];
+          } else if (event.tower_location) {
+            lngLatCoords = [
+              event.tower_location?.longitude,
+              event.tower_location?.latitude,
+            ];
+          }
+          lngLatArray.push(lngLatCoords);
+        });
+      const lastEvent = data.at(-1);
+      if (lastEvent) {
+        const lastCoords: [number, number] = [
+          lastEvent.gps_location.latitude,
+          lastEvent.gps_location.longitude,
+        ];
+        setLastPosition(lastCoords);
+      }
+    }
+    setLngLatCoords(lngLatArray);
+    setIsRefreshing(false);
+  }, [data]);
+
   return (
     <div className={styles.container}>
       <Head>
@@ -18,38 +107,24 @@ const Home: NextPage = () => {
         </h1>
 
         <p className={styles.description}>
-          Get started by editing{' '}
+          Get started by editing{" "}
           <code className={styles.code}>pages/index.tsx</code>
         </p>
 
         <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h2>Documentation &rarr;</h2>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h2>Learn &rarr;</h2>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className={styles.card}
-          >
-            <h2>Examples &rarr;</h2>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h2>Deploy &rarr;</h2>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
+          <p>Here's some notecard data: </p>
+          {/* todo new component: use recharts for data charts showing temp, voltage, motion */}
+          <ul>
+            {data.map((event) => (
+              <li key={event.captured}>
+                {event.captured} - {event.uid}
+              </li>
+            ))}
+          </ul>
+        </div>
+        {/* todo move this styling to the map component css  */}
+        <div id="map" style={{ width: "1000px", height: "1000px" }}>
+          <MapWithNoSSR coords={lngLatCoords} lastPosition={lastPosition} />
         </div>
       </main>
 
@@ -59,14 +134,18 @@ const Home: NextPage = () => {
           target="_blank"
           rel="noopener noreferrer"
         >
-          Powered by{' '}
+          Powered by{" "}
           <span className={styles.logo}>
             <Image src="/vercel.svg" alt="Vercel Logo" width={72} height={16} />
           </span>
         </a>
       </footer>
     </div>
-  )
+  );
 }
 
-export default Home
+export const getServerSideProps: GetServerSideProps = async () => {
+  // we have to pull map data here before rendering the component to draw the lines between GPS data points
+  const data = await fetchNotecardData();
+  return { props: { data } };
+};
