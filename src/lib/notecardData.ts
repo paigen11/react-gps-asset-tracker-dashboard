@@ -1,6 +1,7 @@
 export async function fetchNotecardData() {
   let eventArray: object[] = [];
   // todo make start date dynamic?
+
   const res = await fetch(
     `https://api.notefile.net/v1/projects/${process.env.NOTEHUB_PROJECT_ID}/events?startDate=1636117939`,
     {

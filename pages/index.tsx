@@ -50,9 +50,14 @@ export default function Home({
   const [lastPosition, setLastPosition] = useState<[number, number]>([
     33.82854810044288, -84.32526648205214,
   ]);
+  const [latLngMarkerPositions, setLatLngMarkerPositions] = useState<
+    number[][]
+  >([]);
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
-  // todo consider setting this to even longer intervals like 5 mins
-  const [delayTime, setDelayTime] = useState<number>(300000);
+  // configurable via next.config.js settings
+  const [delayTime, setDelayTime] = useState<number>(
+    Number(process.env.REFRESH_INTERVAL)
+  );
 
   useInterval(() => {
     refreshData();
@@ -60,6 +65,7 @@ export default function Home({
 
   useEffect(() => {
     const lngLatArray: number[][] = [];
+    const latLngArray: number[][] = [];
     if (data && data.length > 0) {
       data
         .sort((a, b) => {
@@ -67,18 +73,28 @@ export default function Home({
         })
         .map((event) => {
           let lngLatCoords: number[] = [];
+          let latLngCoords: number[] = [];
           if (event.gps_location) {
             lngLatCoords = [
               event.gps_location?.longitude,
               event.gps_location?.latitude,
+            ];
+            latLngCoords = [
+              event.gps_location?.latitude,
+              event.gps_location?.longitude,
             ];
           } else if (event.tower_location) {
             lngLatCoords = [
               event.tower_location?.longitude,
               event.tower_location?.latitude,
             ];
+            latLngCoords = [
+              event.tower_location?.latitude,
+              event.tower_location?.longitude,
+            ];
           }
           lngLatArray.push(lngLatCoords);
+          latLngArray.push(latLngCoords);
         });
       const lastEvent = data.at(-1);
       if (lastEvent) {
@@ -90,6 +106,7 @@ export default function Home({
       }
     }
     setLngLatCoords(lngLatArray);
+    setLatLngMarkerPositions(latLngArray);
     setIsRefreshing(false);
   }, [data]);
 
@@ -105,27 +122,35 @@ export default function Home({
         <h1 className={styles.title}>
           Welcome to <a href="https://nextjs.org">Next.js!</a>
         </h1>
-
         <p className={styles.description}>
           Get started by editing{" "}
           <code className={styles.code}>pages/index.tsx</code>
         </p>
-
-        <div className={styles.grid}>
-          <p>Here's some notecard data: </p>
-          {/* todo new component: use recharts for data charts showing temp, voltage, motion */}
-          <ul>
-            {data.map((event) => (
-              <li key={event.captured}>
-                {event.captured} - {event.uid}
-              </li>
-            ))}
-          </ul>
-        </div>
-        {/* todo move this styling to the map component css  */}
-        <div id="map" style={{ width: "1000px", height: "1000px" }}>
-          <MapWithNoSSR coords={lngLatCoords} lastPosition={lastPosition} />
-        </div>
+        {!isRefreshing ? (
+          <>
+            <div className={styles.grid}>
+              <p>Here's some notecard data: </p>
+              {/* todo new component: use recharts for data charts showing temp, voltage, motion */}
+              {/* <ul>
+                {data.map((event) => (
+                  <li key={event.captured}>
+                    {event.captured} - {event.uid}
+                  </li>
+                ))}
+              </ul> */}
+            </div>
+            {/* todo move this styling to the map component css  */}
+            <div id="map" style={{ width: "1000px", height: "1000px" }}>
+              <MapWithNoSSR
+                coords={lngLatCoords}
+                lastPosition={lastPosition}
+                markers={latLngMarkerPositions}
+              />
+            </div>
+          </>
+        ) : (
+          <p>Refreshing data...</p>
+        )}
       </main>
 
       <footer className={styles.footer}>

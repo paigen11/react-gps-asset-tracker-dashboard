@@ -1,4 +1,11 @@
-import { MapContainer, TileLayer, Marker, Popup, GeoJSON } from "react-leaflet";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Popup,
+  GeoJSON,
+  CircleMarker,
+} from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
 import "leaflet-defaulticon-compatibility";
@@ -7,11 +14,13 @@ import "leaflet-defaulticon-compatibility";
 const Map = ({
   coords,
   lastPosition,
+  markers,
 }: {
   coords: number[][];
-  lastPosition: [number, number];
+  lastPosition: number[][];
+  markers: number[][];
 }) => {
-  console.log("data changed!");
+  console.log(markers);
   // todo address this later
   const geoJsonObj: type = [
     {
@@ -19,6 +28,11 @@ const Map = ({
       coordinates: coords,
     },
   ];
+
+  // todo style these markers more nicely - https://leafletjs.com/examples/geojson/
+  const testMarkers = markers.map((latLng, i) => (
+    <CircleMarker key={i} center={latLng} fillColor="red" />
+  ));
 
   // todo stop hardcoding these center etc. format last position popup more nicely and add date/time and possibly nodes for logged data points
   return (
@@ -33,6 +47,7 @@ const Map = ({
       <Marker position={lastPosition} draggable={true} animate={true}>
         <Popup>Last recorded position: `${lastPosition}`</Popup>
         <GeoJSON data={geoJsonObj}></GeoJSON>
+        {testMarkers}
       </Marker>
     </MapContainer>
   );
