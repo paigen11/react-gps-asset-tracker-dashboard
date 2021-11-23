@@ -29,7 +29,7 @@ export async function fetchNotecardData() {
     } else {
       eventData.has_more = false;
     }
-    console.log(newEventData);
+    // console.log(newEventData);
   }
   const filteredEvents = eventArray.filter(
     (event: { file: string }) => event.file === "_track.qo"
@@ -44,6 +44,5 @@ export async function fetchNotecardData() {
   // Go into a loop While (response.has_more) {
   //         do another request using "request.since = response.through"
   // }
-  console.log("count of filtered events", filteredEvents);
   return filteredEvents;
 }

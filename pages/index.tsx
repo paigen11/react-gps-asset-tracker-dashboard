@@ -4,8 +4,11 @@ import Image from "next/image";
 import dynamic from "next/dynamic";
 import { GetServerSideProps } from "next";
 import { useRouter } from "next/router";
+import dayjs from "dayjs";
 import { fetchNotecardData } from "../src/lib/notecardData";
+import Chart from "../src/components/Chart";
 import useInterval from "../src/hooks/useInterval";
+import { convertCelsiusToFahrenheit } from "../src/util/helpers";
 import styles from "../styles/Home.module.css";
 
 export default function Home({
@@ -53,6 +56,10 @@ export default function Home({
   const [latLngMarkerPositions, setLatLngMarkerPositions] = useState<
     number[][]
   >([]);
+  const [tempData, setTempData] = useState<
+    { date: string; shortenedDate: string; temp: number }[]
+  >([]);
+
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   // configurable via next.config.js settings
   const [delayTime, setDelayTime] = useState<number>(
@@ -66,6 +73,11 @@ export default function Home({
   useEffect(() => {
     const lngLatArray: number[][] = [];
     const latLngArray: number[][] = [];
+    const tempDataArray: {
+      date: string;
+      shortenedDate: string;
+      temp: number;
+    }[] = [];
     if (data && data.length > 0) {
       data
         .sort((a, b) => {
@@ -74,6 +86,12 @@ export default function Home({
         .map((event) => {
           let lngLatCoords: number[] = [];
           let latLngCoords: number[] = [];
+          const temperatureObj = {
+            date: dayjs(event.captured).format("MMM D, YYYY h:mm A"),
+            shortenedDate: dayjs(event.captured).format("MM/DD/YYYY"),
+            temp: convertCelsiusToFahrenheit(event.body.temperature),
+          };
+          tempDataArray.push(temperatureObj);
           if (event.gps_location) {
             lngLatCoords = [
               event.gps_location?.longitude,
@@ -107,6 +125,7 @@ export default function Home({
     }
     setLngLatCoords(lngLatArray);
     setLatLngMarkerPositions(latLngArray);
+    setTempData(tempDataArray);
     setIsRefreshing(false);
   }, [data]);
 
@@ -130,14 +149,7 @@ export default function Home({
           <>
             <div className={styles.grid}>
               <p>Here's some notecard data: </p>
-              {/* todo new component: use recharts for data charts showing temp, voltage, motion */}
-              {/* <ul>
-                {data.map((event) => (
-                  <li key={event.captured}>
-                    {event.captured} - {event.uid}
-                  </li>
-                ))}
-              </ul> */}
+              <Chart tempData={tempData} />
             </div>
             {/* todo move this styling to the map component css  */}
             <div id="map" style={{ width: "1000px", height: "1000px" }}>
