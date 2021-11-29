@@ -9,18 +9,19 @@ import {
 import "leaflet/dist/leaflet.css";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
 import "leaflet-defaulticon-compatibility";
-// import styles from "../../styles/Map.module.scss";
+import styles from "../../styles/Map.module.scss";
 
 const Map = ({
   coords,
   lastPosition,
   markers,
+  latestTimestamp,
 }: {
   coords: number[][];
-  lastPosition: number[][];
-  markers: number[][];
+  lastPosition: [number, number];
+  markers: [number, number][];
+  latestTimestamp: string;
 }) => {
-  // console.log(markers);
   // todo address this later
   const geoJsonObj: type = [
     {
@@ -30,26 +31,23 @@ const Map = ({
   ];
 
   // todo style these markers more nicely - https://leafletjs.com/examples/geojson/
-  const testMarkers = markers.map((latLng, i) => (
-    <CircleMarker key={i} center={latLng} fillColor="red" />
+  const mapMarkers = markers.map((latLng, i) => (
+    <CircleMarker key={i} center={latLng} fillColor="navy" />
   ));
 
-  // todo format last position popup more nicely and add date/time and possibly nodes for logged data points
   return (
-    <MapContainer
-      center={lastPosition}
-      zoom={12}
-      style={{ height: "100%", width: "100%" }}
-    >
+    <MapContainer center={lastPosition} zoom={12} className={styles.container}>
       <TileLayer
         url={`https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/256/{z}/{x}/{y}@2x?access_token=${process.env.MAPBOX_ACCESS_TOKEN}`}
       />
       <Marker position={lastPosition} draggable={true} animate={true}>
         <Popup>
-          Last recorded position: {lastPosition} at: ADD TIMESTAMP HERE
+          Last recorded position: {lastPosition[0].toFixed(3)}&#176;,&nbsp;
+          {lastPosition[1].toFixed(3)}&#176; at:&nbsp;
+          {latestTimestamp}
         </Popup>
         <GeoJSON data={geoJsonObj}></GeoJSON>
-        {testMarkers}
+        {mapMarkers}
       </Marker>
     </MapContainer>
   );

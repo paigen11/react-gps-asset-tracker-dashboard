@@ -9,7 +9,6 @@ import {
   Label,
 } from "recharts";
 import CustomTooltip from "./CustomTooltip";
-import "../../styles/Chart.module.scss";
 
 type tempDataProps = {
   shortenedDate: string;
@@ -17,7 +16,7 @@ type tempDataProps = {
   temp: number;
 }[];
 
-const Chart = ({ tempData }: { tempData: tempDataProps }) => {
+const TempChart = ({ tempData }: { tempData: tempDataProps }) => {
   return (
     <ResponsiveContainer width={1000} height={400}>
       <AreaChart
@@ -27,8 +26,8 @@ const Chart = ({ tempData }: { tempData: tempDataProps }) => {
         margin={{
           top: 10,
           right: 30,
-          left: 0,
-          bottom: 0,
+          left: 20,
+          bottom: 30,
         }}
       >
         <CartesianGrid strokeDasharray="3 3" />
@@ -36,7 +35,12 @@ const Chart = ({ tempData }: { tempData: tempDataProps }) => {
           <Label value="Date" position="bottom" />
         </XAxis>
         <YAxis dataKey="temp">
-          <Label value="Temperature" angle={-90} position="insideLeft" />
+          <Label
+            value="Temperature &#8457;"
+            angle={-90}
+            position="left"
+            dy="-10"
+          />
         </YAxis>
         <Tooltip content={<CustomTooltip payload={tempData} />} />
         <Area type="monotone" dataKey="temp" stroke="#8884d8" fill="#8884d8" />
@@ -45,4 +49,4 @@ const Chart = ({ tempData }: { tempData: tempDataProps }) => {
   );
 };
 
-export default Chart;
+export default TempChart;
