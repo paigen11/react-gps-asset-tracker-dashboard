@@ -18,6 +18,7 @@
     "react": "17.0.2",
     "react-dom": "17.0.2",
     "react-leaflet": "^3.2.2",
+    "react-table": "^7.7.0",
     "recharts": "^2.1.6",
     "sass": "^1.43.4",
     "swr": "^1.0.1"
@@ -25,6 +26,7 @@
   "devDependencies": {
     "@types/node": "16.11.7",
     "@types/react": "17.0.34",
+    "@types/react-table": "^7.7.8",
     "eslint": "7",
     "eslint-config-next": "12.0.3",
     "typescript": "4.4.4"

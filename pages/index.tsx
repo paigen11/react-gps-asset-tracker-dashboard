@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Head from "next/head";
 import dynamic from "next/dynamic";
 import { GetServerSideProps } from "next";
@@ -10,6 +10,7 @@ import VoltageChart from "../src/components/VoltageChart";
 import useInterval from "../src/hooks/useInterval";
 import { convertCelsiusToFahrenheit } from "../src/util/helpers";
 import Loader from "../src/components/Loader";
+import EventTable from "../src/components/EventTable";
 import styles from "../styles/Home.module.scss";
 
 export default function Home({
@@ -24,6 +25,7 @@ export default function Home({
     body: {
       temperature: number;
       voltage: number;
+      status: string;
     };
     tower_location?: {
       when: string;
@@ -151,6 +153,30 @@ export default function Home({
     setIsRefreshing(false);
   }, [data]);
 
+  const columns = useMemo(
+    () => [
+      {
+        Header: "Tracker Events",
+        columns: [
+          {
+            Header: "Date",
+            accessor: "data.event.captured",
+          },
+          {
+            Header: "Voltage",
+            accessor: "data.body.voltage",
+          },
+          {
+            Header: "Heartbeat",
+            accessor: "data.body.status",
+          },
+          // { Header: "GPS Location", accessor: "" },
+        ],
+      },
+    ],
+    []
+  );
+
   return (
     <div className={styles.container}>
       <Head>
@@ -162,7 +188,7 @@ export default function Home({
       <main className={styles.main}>
         <h1 className={styles.title}>React Blues Wireless Asset Tracker</h1>
         {!isRefreshing ? (
-          // todo add a second chart for voltage (bar chart) and a table for last received event, timestamp, whether GPS was included or not
+          // todo add a table for last received event, timestamp, whether GPS was included or not
           <>
             <div className={styles.grid}>
               <TempChart tempData={tempData} />
@@ -177,6 +203,9 @@ export default function Home({
             </div>
             <div className={styles.grid}>
               <VoltageChart voltageData={voltageData} />
+            </div>
+            <div className={styles.grid}>
+              <EventTable columns={columns} data={data} />
             </div>
           </>
         ) : (
