@@ -1,8 +1,8 @@
 import {
-  AreaChart,
-  Area,
   XAxis,
   YAxis,
+  LineChart,
+  Line,
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
@@ -10,19 +10,19 @@ import {
 } from "recharts";
 import CustomTooltip from "./CustomTooltip";
 
-type tempDataProps = {
+type voltageDataChart = {
   shortenedDate: string;
   date: string;
-  temp: number;
+  voltage: number;
 }[];
 
-const TempChart = ({ tempData }: { tempData: tempDataProps }) => {
+const VoltageChart = ({ voltageData }: { voltageData: voltageDataChart }) => {
   return (
     <>
-      <h2>Temperature Chart</h2>
+      <h2>Voltage Chart</h2>
       <ResponsiveContainer width={"100%"} height={300} min-width={300}>
-        <AreaChart
-          data={tempData}
+        <LineChart
+          data={voltageData}
           margin={{
             top: 10,
             right: 30,
@@ -34,25 +34,15 @@ const TempChart = ({ tempData }: { tempData: tempDataProps }) => {
           <XAxis dataKey="shortenedDate">
             <Label value="Date" position="bottom" />
           </XAxis>
-          <YAxis dataKey="temp">
-            <Label
-              value="Temperature &#8457;"
-              angle={-90}
-              position="left"
-              dy="-10"
-            />
+          <YAxis dataKey="voltage" type="number" domain={[3, 6]}>
+            <Label value="Voltage V" angle={-90} position="left" dy="-10" />
           </YAxis>
-          <Tooltip content={<CustomTooltip payload={tempData} />} />
-          <Area
-            type="monotone"
-            dataKey="temp"
-            stroke="#8884d8"
-            fill="#8884d8"
-          />
-        </AreaChart>
+          <Tooltip content={<CustomTooltip payload={voltageData} />} />
+          <Line type="monotone" dataKey="voltage" stroke="#82ca9d" />
+        </LineChart>
       </ResponsiveContainer>
     </>
   );
 };
 
-export default TempChart;
+export default VoltageChart;

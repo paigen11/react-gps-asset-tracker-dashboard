@@ -13,7 +13,7 @@
     .title {
       margin: 0 auto auto auto;
       line-height: 1.15;
-      font-size: 4rem;
+      font-size: clamp(2rem, 0.5rem + 6.6667vw, 4rem);
       text-align: center;
     }
 
@@ -26,8 +26,13 @@
     }
 
     .map {
-      width: 1000px;
-      height: 1000px;
+      width: clamp(350px, 75%, 800px);
+      height: max(60vw, 800px);
+      margin-bottom: 70px;
+
+      h2 {
+        text-align: center;
+      }
     }
   }
 

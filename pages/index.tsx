@@ -6,6 +6,7 @@ import { useRouter } from "next/router";
 import dayjs from "dayjs";
 import { fetchNotecardData } from "../src/lib/notecardData";
 import TempChart from "../src/components/TempChart";
+import VoltageChart from "../src/components/VoltageChart";
 import useInterval from "../src/hooks/useInterval";
 import { convertCelsiusToFahrenheit } from "../src/util/helpers";
 import Loader from "../src/components/Loader";
@@ -61,6 +62,10 @@ export default function Home({
     { date: string; shortenedDate: string; temp: number }[]
   >([]);
 
+  const [voltageData, setVoltageData] = useState<
+    { date: string; shortenedDate: string; voltage: number }[]
+  >([]);
+
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   // configurable via next.config.js settings
   const [delayTime, setDelayTime] = useState<number>(
@@ -74,10 +79,15 @@ export default function Home({
   useEffect(() => {
     const lngLatArray: number[][] = [];
     const latLngArray: [number, number][] = [];
-    const tempDataArray: {
+    const temperatureDataArray: {
       date: string;
       shortenedDate: string;
       temp: number;
+    }[] = [];
+    const voltageDataArray: {
+      date: string;
+      shortenedDate: string;
+      voltage: number;
     }[] = [];
     if (data && data.length > 0) {
       data
@@ -92,7 +102,13 @@ export default function Home({
             shortenedDate: dayjs(event.captured).format("MM/DD/YYYY"),
             temp: Number(convertCelsiusToFahrenheit(event.body.temperature)),
           };
-          tempDataArray.push(temperatureObj);
+          temperatureDataArray.push(temperatureObj);
+          const voltageObj = {
+            date: dayjs(event.captured).format("MMM D, YYYY h:mm A"),
+            shortenedDate: dayjs(event.captured).format("MM/DD/YYYY"),
+            voltage: Number(event.body.voltage.toFixed(2)),
+          };
+          voltageDataArray.push(voltageObj);
           if (event.gps_location) {
             lngLatCoords = [
               event.gps_location?.longitude,
@@ -130,7 +146,8 @@ export default function Home({
     }
     setLngLatCoords(lngLatArray);
     setLatLngMarkerPositions(latLngArray);
-    setTempData(tempDataArray);
+    setTempData(temperatureDataArray);
+    setVoltageData(voltageDataArray);
     setIsRefreshing(false);
   }, [data]);
 
@@ -157,6 +174,9 @@ export default function Home({
                 markers={latLngMarkerPositions}
                 latestTimestamp={latestTimestamp}
               />
+            </div>
+            <div className={styles.grid}>
+              <VoltageChart voltageData={voltageData} />
             </div>
           </>
         ) : (
