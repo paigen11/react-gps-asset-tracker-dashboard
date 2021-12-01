@@ -24,6 +24,7 @@
     "swr": "^1.0.1"
   },
   "devDependencies": {
+    "@netlify/plugin-nextjs": "^4.0.0-beta.12",
     "@types/node": "16.11.7",
     "@types/react": "17.0.34",
     "@types/react-table": "^7.7.8",
