@@ -140,9 +140,9 @@ export default function Home({
           lastEvent.gps_location.longitude,
         ];
         setLastPosition(lastCoords);
-        const timestamp = dayjs(lastEvent.captured).format(
-          "MMM D, YYYY h:mm A"
-        );
+        const timestamp = dayjs(lastEvent.captured)
+          .subtract(1, "hour")
+          .format("MMM D, YYYY h:mm A");
         setLatestTimestamp(timestamp);
       }
     }
@@ -201,12 +201,12 @@ export default function Home({
                 latestTimestamp={latestTimestamp}
               />
             </div>
-            <div className={styles.grid}>
+            {/* <div className={styles.grid}>
               <VoltageChart voltageData={voltageData} />
-            </div>
-            <div className={styles.grid}>
+            </div> */}
+            {/* <div className={styles.grid}>
               <EventTable columns={columns} data={data} />
-            </div>
+            </div> */}
           </>
         ) : (
           <Loader />
