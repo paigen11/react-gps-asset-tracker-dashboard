@@ -13,7 +13,6 @@ export async function fetchNotecardData() {
     }
   );
   const eventData = await res.json();
-  console.log(eventData);
   while (eventData.has_more) {
     const res = await fetch(
       `https://api.notefile.net/v1/projects/${process.env.NOTEHUB_PROJECT_ID}/events?since=${eventData.through}`,
@@ -34,7 +33,7 @@ export async function fetchNotecardData() {
   }
   // this is just for data up to the time of the theft
   const filteredEvents = eventArray.filter(
-    (event: { file: string; captured: string }) =>
+    (event: any) =>
       event.file === "_track.qo" && event.captured < "2021-11-27T02:23:09Z"
   );
   /* todo use notehub api docs to fetch more events until `has_more` shows false
