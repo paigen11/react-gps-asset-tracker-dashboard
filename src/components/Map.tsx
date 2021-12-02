@@ -44,10 +44,10 @@ const Map = ({
         <TileLayer
           url={`https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/256/{z}/{x}/{y}@2x?access_token=${process.env.MAPBOX_ACCESS_TOKEN}`}
         />
-        <Marker position={lastPosition} draggable={true} animate={true}>
+        <Marker position={lastPosition} draggable={true}>
           <Popup>
             Last recorded position: {lastPosition[0].toFixed(3)}&#176;,&nbsp;
-            {lastPosition[1].toFixed(3)}&#176; at:&nbsp;
+            {lastPosition[1].toFixed(3)}&#176;at:&nbsp;
             {latestTimestamp}
           </Popup>
           <GeoJSON data={geoJsonObj}></GeoJSON>

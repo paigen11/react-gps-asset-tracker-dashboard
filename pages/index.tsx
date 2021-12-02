@@ -33,7 +33,6 @@ export default function Home({
       longitude: number;
     };
     gps_location: {
-      when: string;
       latitude: number;
       longitude: number;
     };
@@ -111,7 +110,7 @@ export default function Home({
             voltage: Number(event.body.voltage.toFixed(2)),
           };
           voltageDataArray.push(voltageObj);
-          if (event.gps_location) {
+          if (event.gps_location !== null) {
             lngLatCoords = [
               event.gps_location?.longitude,
               event.gps_location?.latitude,
@@ -134,17 +133,21 @@ export default function Home({
           latLngArray.push(latLngCoords);
         });
       const lastEvent = data.at(-1);
-      if (lastEvent) {
-        const lastCoords: [number, number] = [
+      let lastCoords: [number, number] = [0, 1];
+      if (lastEvent && lastEvent.gps_location !== null) {
+        lastCoords = [
           lastEvent.gps_location.latitude,
           lastEvent.gps_location.longitude,
         ];
-        setLastPosition(lastCoords);
-        const timestamp = dayjs(lastEvent.captured).format(
-          "MMM D, YYYY h:mm A"
-        );
-        setLatestTimestamp(timestamp);
+      } else if (lastEvent && lastEvent.tower_location) {
+        lastCoords = [
+          lastEvent.tower_location.latitude,
+          lastEvent.tower_location.longitude,
+        ];
       }
+      setLastPosition(lastCoords);
+      const timestamp = dayjs(lastEvent?.captured).format("MMM D, YYYY h:mm A");
+      setLatestTimestamp(timestamp);
     }
     setLngLatCoords(lngLatArray);
     setLatLngMarkerPositions(latLngArray);
@@ -160,17 +163,34 @@ export default function Home({
         columns: [
           {
             Header: "Date",
-            accessor: "data.event.captured",
+            accessor: "captured",
+            Cell: (props: { value: string }) => {
+              const tidyDate = dayjs(props.value).format("MMM D, YYYY h:mm A");
+              return <span>{tidyDate}</span>;
+            },
           },
           {
             Header: "Voltage",
-            accessor: "data.body.voltage",
+            accessor: "body.voltage",
           },
           {
             Header: "Heartbeat",
-            accessor: "data.body.status",
+            accessor: "body.status",
           },
-          // { Header: "GPS Location", accessor: "" },
+          {
+            Header: "Cell Tower Location",
+            accessor: "tower_location",
+            Cell: (row) => {
+              console.log(row);
+              return (
+                <span>
+                  {row.row.original.tower_location.latitude.toFixed(2)}
+                  &#176;,&nbsp;
+                  {row.row.original.tower_location.longitude.toFixed(2)}&#176;
+                </span>
+              );
+            },
+          },
         ],
       },
     ],
@@ -220,6 +240,7 @@ export default function Home({
 
 export const getServerSideProps: GetServerSideProps = async () => {
   // we have to pull map data here before rendering the component to draw the lines between GPS data points
+  // todo make this configurable to different start dates
   const data = await fetchNotecardData();
   return { props: { data } };
 };

@@ -10,6 +10,7 @@ export const fetcher = async (url: string) => {
   return data;
 };
 
+// todo remove - not currently being used
 export const useNotecardData = () => {
   const { data, error } = useSWR("/api/getEvents", fetcher, {
     refreshInterval: 5000,
