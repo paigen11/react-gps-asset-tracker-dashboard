@@ -181,7 +181,6 @@ export default function Home({
             Header: "Cell Tower Location",
             accessor: "tower_location",
             Cell: (row) => {
-              console.log(row);
               return (
                 <span>
                   {row.row.original.tower_location.latitude.toFixed(2)}
