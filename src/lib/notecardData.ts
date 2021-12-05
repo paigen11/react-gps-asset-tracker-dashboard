@@ -1,4 +1,8 @@
 export async function fetchNotecardData(startDate?: number) {
+  interface dataProps {
+    [file: string]: any;
+  }
+
   let eventArray: object[] = [];
   const baseUrl = `https://api.notefile.net/v1/projects/${process.env.NOTEHUB_PROJECT_ID}/events`;
   let queryParamStartDate = "?startDate=";
@@ -34,8 +38,9 @@ export async function fetchNotecardData(startDate?: number) {
       eventData.has_more = false;
     }
   }
+
   const filteredEvents = eventArray.filter(
-    (event: { file: any }) => event.file === "_track.qo"
+    (event: dataProps) => event.file === "_track.qo"
   );
 
   return filteredEvents;

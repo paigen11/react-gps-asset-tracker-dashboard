@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import { useEffect, useMemo, useState } from "react";
 import Head from "next/head";
 import dynamic from "next/dynamic";
@@ -13,31 +15,29 @@ import Loader from "../src/components/Loader";
 import EventTable from "../src/components/EventTable";
 import styles from "../styles/Home.module.scss";
 
-export default function Home({
-  data,
-}: {
-  data: {
-    uid: string;
-    device_uid: string;
-    file: string;
-    captured: string;
-    received: string;
-    body: {
-      temperature: number;
-      voltage: number;
-      status: string;
-    };
-    tower_location?: {
-      when: string;
-      latitude: number;
-      longitude: number;
-    };
-    gps_location: {
-      latitude: number;
-      longitude: number;
-    };
-  }[];
-}) {
+type dataProps = {
+  uid: string;
+  device_uid: string;
+  file: string;
+  captured: string;
+  received: string;
+  body: {
+    temperature: number;
+    voltage: number;
+    status: string;
+  };
+  tower_location?: {
+    when: string;
+    latitude: number;
+    longitude: number;
+  };
+  gps_location: {
+    latitude: number;
+    longitude: number;
+  };
+};
+
+export default function Home({ data }: { data: dataProps[] }) {
   // needed to make the Leaflet map render correctly
   const MapWithNoSSR = dynamic(() => import("../src/components/Map"), {
     ssr: false,
@@ -66,6 +66,7 @@ export default function Home({
   const [voltageData, setVoltageData] = useState<
     { date: string; shortenedDate: string; voltage: number }[]
   >([]);
+  const [eventTableData, setEventTableData] = useState<dataProps[]>([]);
 
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   // configurable via next.config.js settings
@@ -91,6 +92,8 @@ export default function Home({
       voltage: number;
     }[] = [];
     if (data && data.length > 0) {
+      const eventData = [...data].reverse();
+      setEventTableData(eventData);
       data
         .sort((a, b) => {
           return Number(a.captured) - Number(b.captured);
@@ -156,22 +159,30 @@ export default function Home({
     setIsRefreshing(false);
   }, [data]);
 
+  interface row {
+    [row: { string }]: any;
+  }
+
   const columns = useMemo(
     () => [
       {
-        Header: "Tracker Events",
+        Header: "Latest Events",
         columns: [
           {
             Header: "Date",
             accessor: "captured",
             Cell: (props: { value: string }) => {
-              const tidyDate = dayjs(props.value).format("MMM D, YYYY h:mm A");
+              const tidyDate = dayjs(props.value).format("MMM D, YY h:mm A");
               return <span>{tidyDate}</span>;
             },
           },
           {
             Header: "Voltage",
             accessor: "body.voltage",
+            Cell: (props: { value: string }) => {
+              const tidyVoltage = Number(props.value).toFixed(2);
+              return <span>{tidyVoltage}V</span>;
+            },
           },
           {
             Header: "Heartbeat",
@@ -207,7 +218,6 @@ export default function Home({
       <main className={styles.main}>
         <h1 className={styles.title}>React Blues Wireless Asset Tracker</h1>
         {!isRefreshing ? (
-          // todo add a table for last received event, timestamp, whether GPS was included or not
           <>
             <div className={styles.grid}>
               <TempChart tempData={tempData} />
@@ -224,7 +234,7 @@ export default function Home({
               <VoltageChart voltageData={voltageData} />
             </div>
             <div className={styles.grid}>
-              <EventTable columns={columns} data={data} />
+              <EventTable columns={columns} data={eventTableData} />
             </div>
           </>
         ) : (
