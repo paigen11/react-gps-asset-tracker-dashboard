@@ -46,8 +46,11 @@ const Map = ({
         />
         <Marker position={lastPosition} draggable={true}>
           <Popup>
-            Last recorded position: {lastPosition[0].toFixed(3)}&#176;,&nbsp;
-            {lastPosition[1].toFixed(3)}&#176;at:&nbsp;
+            Last recorded position:
+            <br />
+            {lastPosition[0].toFixed(3)}&#176;,&nbsp;
+            {lastPosition[1].toFixed(3)}&#176;
+            <br />
             {latestTimestamp}
           </Popup>
           <GeoJSON data={geoJsonObj}></GeoJSON>
