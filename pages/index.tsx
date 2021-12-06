@@ -1,5 +1,4 @@
 // @ts-nocheck
-
 import { useEffect, useMemo, useState } from "react";
 import Head from "next/head";
 import dynamic from "next/dynamic";
@@ -69,6 +68,7 @@ export default function Home({ data }: { data: dataProps[] }) {
   const [eventTableData, setEventTableData] = useState<dataProps[]>([]);
 
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
+
   // configurable via next.config.js settings
   const [delayTime, setDelayTime] = useState<number>(
     Number(process.env.REFRESH_INTERVAL)
