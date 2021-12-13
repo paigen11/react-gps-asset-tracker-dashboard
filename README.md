@@ -6,7 +6,7 @@ https://user-images.githubusercontent.com/20400845/145855414-88b1a46c-8ee4-40ab-
 
 ## Project Basics
 
-The Asset Tracking dashboard is a Next.js app which serves up a pre-configured dashboard complete with Leaflet.js map to plot Notecard coordinates as they're relayed to Notehub, Recharts charts displaying Notecard's current voltage and temperature, and a react-table event list so a user can see the frequency with which tracking events are being recorded.
+The Asset Tracking dashboard is a Next.js app which serves up a pre-configured dashboard complete with Leaflet.js map and Mapbox overlay to plot Notecard coordinates as they're relayed to Notehub, Recharts charts displaying Notecard's current voltage and temperature, and a react-table event list so a user can see the frequency with which tracking events are being recorded.
 
 It is preconfigured to poll for new events from the Notehub project every 5 minutes, and re-render the latest data on the dashboard.
 
@@ -17,6 +17,7 @@ It is preconfigured to poll for new events from the Notehub project every 5 minu
 - [Recharts Docs](https://recharts.org/en-US/) - Introduction to Recharts composable chart library
 - [React Leaflet Docs](https://react-leaflet.js.org/docs/start-introduction/) - React Leaflet library introduction
 - [React Table Docs](https://react-table.tanstack.com/docs/overview) - React Table getting started and example documentation
+- [Mapbox Docs](https://docs.mapbox.com/help/getting-started/access-tokens/) - How to generate Mapbox access token and select view
 
 ## Getting Started
 
