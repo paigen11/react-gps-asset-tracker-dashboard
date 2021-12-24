@@ -8,7 +8,9 @@ https://user-images.githubusercontent.com/20400845/145855414-88b1a46c-8ee4-40ab-
 
 The Asset Tracking dashboard is a Next.js app which serves up a pre-configured dashboard complete with Leaflet.js map and Mapbox overlay to plot Notecard coordinates as they're relayed to Notehub, Recharts charts displaying Notecard's current voltage and temperature, and a react-table event list so a user can see the frequency with which tracking events are being recorded.
 
-It is preconfigured to poll for new events from the Notehub project every 5 minutes, and re-render the latest data on the dashboard.
+The Notecard records its current GPS location once every 10 minutes while the vehicle is in motion.
+
+It is preconfigured to poll for new events from the Notehub project every 2 minutes, and re-render the latest data on the dashboard.
 
 ## Learn More
 
@@ -61,7 +63,6 @@ Below are steps from the Notecard all the way to the software to get your own in
 ```json
 NOTEHUB_PROJECT_ID=APP_ID_GOES_HERE
 NOTEHUB_TOKEN=NOTEHUB_GENERATED_TOKEN_GOES_HERE
-REFRESH_INTERVAL=300000
 MAPBOX_ACCESS_TOKEN=MAPBOX_ACCESS_TOKEN_GOES_HERE_IF_NOT_USING_MINE
 ```
 
