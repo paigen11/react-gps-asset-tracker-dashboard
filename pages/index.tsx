@@ -166,14 +166,27 @@ export default function Home({ data }: { data: dataProps[] }) {
             accessor: "body.status",
           },
           {
+            Header: "GPS Location",
+            accessor: "gps_location",
+            Cell: (row) => {
+              return (
+                <span>
+                  {row.row.original.gps_location.latitude.toFixed(6)}
+                  &#176;,&nbsp;
+                  {row.row.original.gps_location.longitude.toFixed(6)}&#176;
+                </span>
+              );
+            },
+          },
+          {
             Header: "Cell Tower Location",
             accessor: "tower_location",
             Cell: (row) => {
               return (
                 <span>
-                  {row.row.original.tower_location.latitude.toFixed(2)}
+                  {row.row.original.tower_location.latitude.toFixed(3)}
                   &#176;,&nbsp;
-                  {row.row.original.tower_location.longitude.toFixed(2)}&#176;
+                  {row.row.original.tower_location.longitude.toFixed(3)}&#176;
                 </span>
               );
             },
