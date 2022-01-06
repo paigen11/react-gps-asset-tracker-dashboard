@@ -34,7 +34,7 @@ const VoltageChart = ({ voltageData }: { voltageData: voltageDataChart }) => {
           <XAxis dataKey="shortenedDate">
             <Label value="Date" position="bottom" />
           </XAxis>
-          <YAxis dataKey="voltage" type="number" domain={[3, 6]}>
+          <YAxis dataKey="voltage" type="number" domain={[3.3, 5.6]}>
             <Label value="Voltage V" angle={-90} position="left" dy="-10" />
           </YAxis>
           <Tooltip content={<CustomTooltip payload={voltageData} />} />

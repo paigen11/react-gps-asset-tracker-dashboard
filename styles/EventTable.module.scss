@@ -1,0 +1,17 @@
+.tableWrapper {
+  border-spacing: 0;
+  border: 1px solid #ededed;
+  width: 100%;
+
+  tr:nth-child(2n) {
+    background-color: #fafafa;
+  }
+
+  th {
+    padding: 15px;
+  }
+
+  td {
+    padding: 5px 10px;
+  }
+}

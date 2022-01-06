@@ -1,56 +1,43 @@
+// @ts-nocheck
 import { useEffect, useMemo, useState } from "react";
 import Head from "next/head";
 import dynamic from "next/dynamic";
-import { GetServerSideProps } from "next";
-import { useRouter } from "next/router";
+import { GetStaticProps } from "next";
 import dayjs from "dayjs";
 import { fetchNotecardData } from "../src/lib/notecardData";
 import TempChart from "../src/components/TempChart";
 import VoltageChart from "../src/components/VoltageChart";
-import useInterval from "../src/hooks/useInterval";
 import { convertCelsiusToFahrenheit } from "../src/util/helpers";
-import Loader from "../src/components/Loader";
 import EventTable from "../src/components/EventTable";
 import styles from "../styles/Home.module.scss";
 
-export default function Home({
-  data,
-}: {
-  data: {
-    uid: string;
-    device_uid: string;
-    file: string;
-    captured: string;
-    received: string;
-    body: {
-      temperature: number;
-      voltage: number;
-      status: string;
-    };
-    tower_location?: {
-      when: string;
-      latitude: number;
-      longitude: number;
-    };
-    gps_location: {
-      when: string;
-      latitude: number;
-      longitude: number;
-    };
-  }[];
-}) {
+type dataProps = {
+  uid: string;
+  device_uid: string;
+  file: string;
+  captured: string;
+  received: string;
+  body: {
+    temperature: number;
+    voltage: number;
+    status: string;
+  };
+  tower_location?: {
+    when: string;
+    latitude: number;
+    longitude: number;
+  };
+  gps_location: {
+    latitude: number;
+    longitude: number;
+  };
+};
+
+export default function Home({ data }: { data: dataProps[] }) {
   // needed to make the Leaflet map render correctly
   const MapWithNoSSR = dynamic(() => import("../src/components/Map"), {
     ssr: false,
   });
-
-  const router = useRouter();
-
-  // h/t to Josh Comeau for this stroke of brilliance: https://www.joshwcomeau.com/nextjs/refreshing-server-side-props/
-  const refreshData = () => {
-    router.replace(router.asPath, router.asPath, { scroll: false });
-    setIsRefreshing(true);
-  };
 
   const [lngLatCoords, setLngLatCoords] = useState<number[][]>([]);
   const [lastPosition, setLastPosition] = useState<[number, number]>([
@@ -67,16 +54,7 @@ export default function Home({
   const [voltageData, setVoltageData] = useState<
     { date: string; shortenedDate: string; voltage: number }[]
   >([]);
-
-  const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
-  // configurable via next.config.js settings
-  const [delayTime, setDelayTime] = useState<number>(
-    Number(process.env.REFRESH_INTERVAL)
-  );
-
-  useInterval(() => {
-    refreshData();
-  }, delayTime);
+  const [eventTableData, setEventTableData] = useState<dataProps[]>([]);
 
   useEffect(() => {
     const lngLatArray: number[][] = [];
@@ -92,6 +70,8 @@ export default function Home({
       voltage: number;
     }[] = [];
     if (data && data.length > 0) {
+      const eventData = [...data].reverse();
+      setEventTableData(eventData);
       data
         .sort((a, b) => {
           return Number(a.captured) - Number(b.captured);
@@ -111,7 +91,7 @@ export default function Home({
             voltage: Number(event.body.voltage.toFixed(2)),
           };
           voltageDataArray.push(voltageObj);
-          if (event.gps_location) {
+          if (event.gps_location !== null) {
             lngLatCoords = [
               event.gps_location?.longitude,
               event.gps_location?.latitude,
@@ -134,43 +114,85 @@ export default function Home({
           latLngArray.push(latLngCoords);
         });
       const lastEvent = data.at(-1);
-      if (lastEvent) {
-        const lastCoords: [number, number] = [
+      let lastCoords: [number, number] = [0, 1];
+      if (lastEvent && lastEvent.gps_location !== null) {
+        lastCoords = [
           lastEvent.gps_location.latitude,
           lastEvent.gps_location.longitude,
         ];
-        setLastPosition(lastCoords);
-        const timestamp = dayjs(lastEvent.captured)
-          .subtract(1, "hour")
-          .format("MMM D, YYYY h:mm A");
-        setLatestTimestamp(timestamp);
+      } else if (lastEvent && lastEvent.tower_location) {
+        lastCoords = [
+          lastEvent.tower_location.latitude,
+          lastEvent.tower_location.longitude,
+        ];
       }
+      setLastPosition(lastCoords);
+      const timestamp = dayjs(lastEvent?.captured)
+        .subtract(1, "hour")
+        .format("MMM D, YYYY h:mm A");
+      setLatestTimestamp(timestamp);
     }
     setLngLatCoords(lngLatArray);
     setLatLngMarkerPositions(latLngArray);
     setTempData(temperatureDataArray);
     setVoltageData(voltageDataArray);
-    setIsRefreshing(false);
   }, [data]);
+
+  interface row {
+    [row: { string }]: any;
+  }
 
   const columns = useMemo(
     () => [
       {
-        Header: "Tracker Events",
+        Header: "Latest Events",
         columns: [
           {
             Header: "Date",
-            accessor: "data.event.captured",
+            accessor: "captured",
+            Cell: (props: { value: string }) => {
+              const tidyDate = dayjs(props.value).format("MMM D, YY h:mm A");
+              return <span>{tidyDate}</span>;
+            },
           },
           {
             Header: "Voltage",
-            accessor: "data.body.voltage",
+            accessor: "body.voltage",
+            Cell: (props: { value: string }) => {
+              const tidyVoltage = Number(props.value).toFixed(2);
+              return <span>{tidyVoltage}V</span>;
+            },
           },
           {
             Header: "Heartbeat",
-            accessor: "data.body.status",
+            accessor: "body.status",
           },
-          // { Header: "GPS Location", accessor: "" },
+          {
+            Header: "GPS Location",
+            accessor: "gps_location",
+            Cell: (row) => {
+              return (
+                <span>
+                  {row.row.original.gps_location.latitude.toFixed(6)}
+                  &#176;,&nbsp;
+                  {row.row.original.gps_location.longitude.toFixed(6)}&#176;
+                </span>
+              );
+            },
+          },
+          {
+            Header: "Cell Tower Location",
+            accessor: "tower_location",
+            Cell: (row) => {
+              return (
+                <span>
+                  {row.row.original.tower_location.latitude.toFixed(3)}
+                  &#176;,&nbsp;
+                  {row.row.original.tower_location.longitude.toFixed(3)}&#176;
+                </span>
+              );
+            },
+          },
         ],
       },
     ],
@@ -184,42 +206,35 @@ export default function Home({
         <meta name="description" content="Generated by create next app" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-
       <main className={styles.main}>
         <h1 className={styles.title}>React Blues Wireless Asset Tracker</h1>
-        {!isRefreshing ? (
-          // todo add a table for last received event, timestamp, whether GPS was included or not
-          <>
-            <div className={styles.grid}>
-              <TempChart tempData={tempData} />
-            </div>
-            <div className={styles.map}>
-              <MapWithNoSSR
-                coords={lngLatCoords}
-                lastPosition={lastPosition}
-                markers={latLngMarkerPositions}
-                latestTimestamp={latestTimestamp}
-              />
-            </div>
-            {/* <div className={styles.grid}>
-              <VoltageChart voltageData={voltageData} />
-            </div> */}
-            {/* <div className={styles.grid}>
-              <EventTable columns={columns} data={data} />
-            </div> */}
-          </>
-        ) : (
-          <Loader />
-        )}
+        <div className={styles.grid}>
+          <TempChart tempData={tempData} />
+        </div>
+        <div className={styles.map}>
+          <MapWithNoSSR
+            coords={lngLatCoords}
+            lastPosition={lastPosition}
+            markers={latLngMarkerPositions}
+            latestTimestamp={latestTimestamp}
+          />
+        </div>
+        <div className={styles.grid}>
+          <VoltageChart voltageData={voltageData} />
+        </div>
+        <div className={styles.grid}>
+          <EventTable columns={columns} data={eventTableData} />
+        </div>
       </main>
-
       <footer className={styles.footer}></footer>
     </div>
   );
 }
 
-export const getServerSideProps: GetServerSideProps = async () => {
-  // we have to pull map data here before rendering the component to draw the lines between GPS data points
-  const data = await fetchNotecardData();
-  return { props: { data } };
+export const getStaticProps: GetStaticProps = async () => {
+  /* we're able to use Nextjs's ISR (incremental static regneration) 
+  revalidate functionality to re-fetch updated map coords and re-render one a regular interval */
+  const data = await fetchNotecardData(1637874000);
+
+  return { props: { data }, revalidate: 120 };
 };
