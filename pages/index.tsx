@@ -127,9 +127,7 @@ export default function Home({ data }: { data: dataProps[] }) {
         ];
       }
       setLastPosition(lastCoords);
-      const timestamp = dayjs(lastEvent?.captured)
-        .subtract(1, "hour")
-        .format("MMM D, YYYY h:mm A");
+      const timestamp = dayjs(lastEvent?.captured).format("MMM D, YYYY h:mm A");
       setLatestTimestamp(timestamp);
     }
     setLngLatCoords(lngLatArray);
@@ -234,7 +232,7 @@ export default function Home({ data }: { data: dataProps[] }) {
 export const getStaticProps: GetStaticProps = async () => {
   /* we're able to use Nextjs's ISR (incremental static regneration) 
   revalidate functionality to re-fetch updated map coords and re-render one a regular interval */
-  const data = await fetchNotecardData(1637874000);
+  const data = await fetchNotecardData();
 
   return { props: { data }, revalidate: 120 };
 };
