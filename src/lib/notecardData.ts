@@ -38,9 +38,10 @@ export async function fetchNotecardData(startDate?: number) {
       eventData.has_more = false;
     }
   }
-
+  // this is just for data up to the time of the theft
   const filteredEvents = eventArray.filter(
-    (event: dataProps) => event.file === "_track.qo"
+    (event: dataProps) =>
+      event.file === "_track.qo" && event.captured < "2021-11-27T02:23:09Z"
   );
 
   return filteredEvents;
