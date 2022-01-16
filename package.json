@@ -8,11 +8,9 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@types/leaflet": "^1.7.5",
     "dayjs": "^1.10.7",
     "leaflet": "^1.7.1",
     "leaflet-defaulticon-compatibility": "^0.1.1",
-    "leaflet-geosearch": "^3.6.0",
     "next": "12.0.3",
     "react": "17.0.2",
     "react-dom": "17.0.2",
@@ -23,11 +21,34 @@
   },
   "devDependencies": {
     "@netlify/plugin-nextjs": "^4.0.0",
+    "@types/leaflet": "^1.7.5",
     "@types/node": "16.11.7",
     "@types/react": "17.0.34",
     "@types/react-table": "^7.7.8",
     "eslint": "7",
     "eslint-config-next": "12.0.3",
     "typescript": "4.4.4"
-  }
+  },
+  "description": "This is an asset tracking dashboard to display the information captured from Blues Wireless Notecards in vehicles.",
+  "version": "1.0.0",
+  "main": "next.config.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/paigen11/react-gps-asset-tracker-dashboard.git"
+  },
+  "keywords": [
+    "nextjs",
+    "typescript",
+    "asset tracker",
+    "gps",
+    "react",
+    "map",
+    "leaflet"
+  ],
+  "author": "Paige Niedringhaus (paigen11@gmail.com)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/paigen11/react-gps-asset-tracker-dashboard/issues"
+  },
+  "homepage": "https://github.com/paigen11/react-gps-asset-tracker-dashboard#readme"
 }
