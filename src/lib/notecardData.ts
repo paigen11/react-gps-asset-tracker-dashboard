@@ -26,8 +26,8 @@ export async function fetchNotecardData(startDate?: number) {
   // console.log(eventData);
 
   while (
-    eventData.has_more &&
-    eventData.events[0].captured < "2021-12-20T02:23:09Z"
+    eventData.has_more
+    // && eventData.events[0].captured < "2021-12-20T02:23:09Z"
   ) {
     const res = await fetch(`${baseUrl}?since=${eventData.through}`, {
       headers: headers,
@@ -44,7 +44,8 @@ export async function fetchNotecardData(startDate?: number) {
   const filteredEvents = eventArray.filter(
     (event: dataProps) =>
       // hardcoding an end date to limit amount of data displaying
-      event.file === "_track.qo" && event.captured < "2021-12-20T02:23:09Z"
+      event.file === "_track.qo"
+    // && event.captured < "2021-12-20T02:23:09Z"
   );
 
   return filteredEvents;
