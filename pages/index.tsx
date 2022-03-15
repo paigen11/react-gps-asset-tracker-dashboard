@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Head from "next/head";
 import dynamic from "next/dynamic";
-import { GetStaticProps } from "next";
+import { GetServerSideProps } from "next";
 import dayjs from "dayjs";
 import { fetchNotecardData } from "../src/lib/notecardData";
 import TempChart from "../src/components/TempChart";
@@ -205,7 +205,7 @@ export default function Home({ data }: { data: dataProps[] }) {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className={styles.main}>
-        <h1 className={styles.title}>React Blues Wireless Asset Tracker</h1>
+        <h1 className={styles.title}>Blues Wireless Asset Tracker Demo</h1>
         <div className={styles.grid}>
           <TempChart tempData={tempData} />
         </div>
@@ -229,10 +229,8 @@ export default function Home({ data }: { data: dataProps[] }) {
   );
 }
 
-export const getStaticProps: GetStaticProps = async () => {
-  /* we're able to use Nextjs's ISR (incremental static regneration) 
-  revalidate functionality to re-fetch updated map coords and re-render one a regular interval */
+export const getServerSideProps: GetServerSideProps = async () => {
   const data = await fetchNotecardData();
 
-  return { props: { data }, revalidate: 120 };
+  return { props: { data } };
 };
