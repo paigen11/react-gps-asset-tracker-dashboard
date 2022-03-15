@@ -229,7 +229,7 @@ export default function Home({ data }: { data: dataProps[] }) {
   );
 }
 
-export const getServerSideProps: GetServerSideProps = async () => {
+export const getStaticProps: GetStaticProps = async () => {
   const data = await fetchNotecardData(1647097837);
 
   return { props: { data } };
